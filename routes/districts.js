@@ -1,5 +1,6 @@
 const router = require("express").Router();
 let District = require("../models/District");
+const addDistrictData = require("../Utils/dataGenerator"); // Assuming dataGenerator.js is in the same directory
 
 //create route to create a product
 router.route("/").post((req,res) => {
@@ -99,6 +100,11 @@ router.route("/:id").delete(async (res,rep) =>{
         res.status(500).send({status: "Error when deleting", error: err.message});
     })
 })
+
+
+//Set Time Interval
+setInterval(addDistrictData, 5 * 60 * 100);
+
 
 //export
 module.exports = router;
