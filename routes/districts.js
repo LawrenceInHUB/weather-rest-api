@@ -1,9 +1,7 @@
 const router = require("express").Router();
 let District = require("../models/District");
-const addDistrictData = require("../Utils/dataGenerator"); // Assuming dataGenerator.js is in the same directory
-
-//create route to create a product
-router.route("/").post((req,res) => {
+const addDistrictData = require("../Utils/dataGenerator");
+router.route("/").post((req, res) => {
     const location = req.body.location;
     const condition = req.body.condition;
     const temperature = Number(req.body.temperature);
@@ -11,36 +9,57 @@ router.route("/").post((req,res) => {
     const humidity = Number(req.body.humidity);
     const reported_time = Date.parse(req.body.reported_time);
     const air_pressure = req.body.air_pressure;
-    
-
+  
     const newDistrict = new District({
-        location,
-        condition,
-        temperature,
-        rainfall,
-        humidity,
-        reported_time,
-        air_pressure
-
-    })
-
-    newProduct.save().then(() =>{
-        res.json("District Data added")
-    }).catch((err) =>{
+      location,
+      condition,
+      temperature,
+      rainfall,
+      humidity,
+      reported_time,
+      air_pressure,
+    });
+  
+    newDistrict
+      .save()
+      .then(async () => {
+        await maintainLatestDistricts(2);
+        res.json("District Data added");
+      })
+      .catch((err) => {
         console.log(err);
-    })
+        res.status(500).send({ status: "Error adding district", error: err.message });
+      });
+  });
+  
+  async function maintainLatestDistricts(maxCount) {
+    try {
+      const districts = await District.find().sort({ reported_time: -1 });
+  
+      if (districts.length > maxCount) {
+        const districtsToDelete = districts.slice(maxCount);
+        for (const district of districtsToDelete) {
+          await District.findByIdAndDelete(district._id);
+        }
+      }
+    } catch (error) {
+      console.error("Error maintaining latest districts:", error);
+    }
+  }
+  
+  router.route("/").get((req, res) => {
+    District.find()
+      .then((getDistrict) => {
+        res.json(getDistrict);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).send({ status: "Error fetching districts", error: err.message });
+      });
+  });
 
-})
 
 
-//create route to view district data 
-router.route("/").get((req,res) =>{
-    District.find().then((getDistrict) =>{
-        res.json(getDistrict)
-    }).catch((err) =>{
-        console.log(err)
-    })
-})
 
 //get only 1 districts by id
 router.route("/:id").get(async (req,res) =>{
@@ -103,7 +122,7 @@ router.route("/:id").delete(async (res,rep) =>{
 
 
 //Set Time Interval
-setInterval(addDistrictData, 5 * 60 * 100);
+setInterval(addDistrictData, 1 * 60 * 100);
 
 
 //export
