@@ -1,33 +1,13 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const addDistrictData = require("./Utils/dataGenerator"); 
-const districtRoutes = require("./routes/districts"); 
+const express = require('express');
+const districtRoutes = require('./routes/districtRoutes');
 
 const app = express();
-dotenv.config();
 
-const PORT = process.env.PORT || 8088;
+app.use(express.json()); 
 
-app.use(cors());
-app.use(bodyParser.json());
+app.use('/', districtRoutes);
 
-const URL = process.env.MONGODB_URL;
-mongoose.set("strictQuery", false);
-mongoose.connect(URL, {});
-
-const connection = mongoose.connection;
-connection.once('open', () => {
-    console.log("Mongo DB Connected!");
-    // Call the data generator when the MongoDB connection is established
-    addDistrictData();
-});
-
-// Routes
-app.use("/districts", districtRoutes);
-
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is up. Listening on PORT ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });

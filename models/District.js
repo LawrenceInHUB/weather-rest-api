@@ -1,35 +1,33 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+const mssql = require('mssql');
 
-const districtSchema = new Schema({
+const districtSchema = {
     location: {
-        type: String,
-        required: true
+        type: mssql.NVarChar,
+        nullable: false
     },
     condition: {
-        type: String,
-        required: true
+        type: mssql.NVarChar,
+        nullable: false
     },
     temperature: {
-        type: Number,
-        required: true
+        type: mssql.Float,
+        nullable: false
     },
     rainfall: {
-        type: Number,
-        required: true
+        type: mssql.Float,
+        nullable: false
     },
     humidity: {
-        type: Number,
-        required: true
+        type: mssql.Float,
+        nullable: false
     },
     reported_time: {
-        type: Date,
-        required: true
+        type: mssql.DateTime,
+        nullable: false
     },
     air_pressure: {
-        type: String
+        type: mssql.Float
     }
-});
+};
 
-const District = mongoose.model("District", districtSchema);
-module.exports = District;
+module.exports = districtSchema;
