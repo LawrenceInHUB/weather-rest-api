@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { sql, connectToDatabase } = require('../Utils/sqlConnection'); // Import the SQL module and database connection function
-const districtSchema = require('../models/District'); // Import the schema
-const generateRandomData = require('../Utils/dataGenerator'); // Import the data generator module
-const locations = require('../Utils/locations'); // Import the locations array
-
-// Define the database configuration
+const { sql, connectToDatabase } = require('../Utils/sqlConnection'); 
+const districtSchema = require('../models/District');
+const generateRandomData = require('../Utils/dataGenerator'); 
+const locations = require('../Utils/locations');
 const config = {
     user: 'user',
     password: 'Nibm@123',
@@ -17,14 +15,11 @@ const config = {
     }
 };
 
-// Call the connectToDatabase function to establish the connection
 connectToDatabase();
 
-// Create a pool of connections based on the configuration
 const pool = new sql.ConnectionPool(config);
 const poolConnect = pool.connect();
 
-// Define a middleware to ensure the database connection is established before handling requests
 router.use(async (req, res, next) => {
   try {
     await poolConnect;
@@ -109,7 +104,6 @@ router.get('/districts', async (req, res) => {
 });
 
 // Define the function to automatically post data for each location every 5 seconds
-// Define the function to automatically post data for each location every 5 seconds
 async function postLocationData(location) {
     try {
         const request = pool.request();
@@ -132,7 +126,7 @@ async function postLocationData(location) {
         const deleteQuery = `
             DELETE FROM district
             WHERE id NOT IN (
-                SELECT TOP 2 id
+                SELECT TOP 5 id
                 FROM district
                 WHERE location = @location
                 ORDER BY reported_time DESC
@@ -145,6 +139,28 @@ async function postLocationData(location) {
         console.error(`Error inserting data for ${location}:`, error);
     }
 }
+
+router.get('/districts/:districtName', async (req, res) => {
+    try {
+        const districtName = req.params.districtName;
+        const request = pool.request();
+        
+        const result = await request
+            .input('districtName', sql.NVarChar, districtName)
+            .query(`
+                SELECT TOP 1 *
+                FROM district
+                WHERE location = @districtName
+                ORDER BY reported_time DESC
+            `);
+        
+        res.status(200).json(result.recordset);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 
 

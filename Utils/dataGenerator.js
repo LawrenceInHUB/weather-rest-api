@@ -1,4 +1,3 @@
-
 const sql = require('mssql');
 const locations = require('./locations');
 
@@ -6,7 +5,6 @@ async function generateRandomData(location) {
     let minTemp, maxTemp;
     let condition, minHumidity, maxHumidity, minRainfall, maxRainfall;
 
-    // Set min and max temperature range, humidity range, and rainfall range based on location
     switch(location) {
         case "Colombo":
             minTemp = 25;
@@ -266,3 +264,4 @@ async function generateRandomData(location) {
 
 
 module.exports = generateRandomData;
+
