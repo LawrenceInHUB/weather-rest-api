@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/', districtRoutes);
+app.use('/api/', districtRoutes);
 
 const PORT = process.env.PORT || 8010;
 app.listen(PORT, () => {
