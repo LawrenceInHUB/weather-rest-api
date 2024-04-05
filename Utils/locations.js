@@ -4,7 +4,7 @@ const locations = [
     "Galle", "Matara", "Hambantota", "Jaffna", "Mannar",
     "Vavuniya", "Mullaitivu", "Kilinochchi", "Batticaloa", "Ampara",
     "Trincomalee", "Kurunegala", "Puttalam", "Anuradhapura", "Polonnaruwa",
-    "Badulla", "Monaragala", "Ratnapura", "Kegalle", "Matale"
+    "Badulla", "Moneragala", "Ratnapura", "Kegalle", "Matale"
 ];
 
 module.exports = locations;

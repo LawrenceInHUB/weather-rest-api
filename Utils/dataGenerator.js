@@ -195,7 +195,7 @@ async function generateRandomData(location) {
             minRainfall = 10;
             maxRainfall = 50;
             break;
-        case "Monaragala":
+        case "Moneragala":
             minTemp = 24;
             maxTemp = 34;
             condition = 'Partly Cloudy';
