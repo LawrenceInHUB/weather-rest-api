@@ -103,7 +103,7 @@ router.get('/districts', async (req, res) => {
     }
 });
 
-// Define the function to automatically post data for each location every 5 seconds
+// Define the function to automatically post data for each location every 5 minutes
 async function postLocationData(location) {
     try {
         const request = pool.request();
@@ -122,7 +122,7 @@ async function postLocationData(location) {
                 VALUES (@location, @condition, @temperature, @rainfall, @humidity, @reported_time, @air_pressure)`);
 
 
-        // Keep only the latest 100 records for each location
+        // Keep only the latest 125 records for each location
         const deleteQuery = `
             DELETE FROM district
             WHERE id NOT IN (
@@ -164,11 +164,11 @@ router.get('/districts/:districtName', async (req, res) => {
 
 
 
-// Automatically post data for each location every 5 seconds
+// Automatically post data for each location every 5 minutes
 setInterval(async () => {
     for (const location of locations) {
         await postLocationData(location);
     }
-}, 5000);
+}, 1000);
 
 module.exports = router;
