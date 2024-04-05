@@ -169,6 +169,6 @@ setInterval(async () => {
     for (const location of locations) {
         await postLocationData(location);
     }
-}, 1000);
+}, 5 * 60 * 1000);
 
 module.exports = router;
