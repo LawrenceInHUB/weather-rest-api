@@ -122,7 +122,7 @@ async function postLocationData(location) {
         .query(`INSERT INTO district (location, condition, temperature, rainfall, humidity, reported_time, air_pressure) 
                 VALUES (@location, @condition, @temperature, @rainfall, @humidity, @reported_time, @air_pressure)`);
 
-        // Keep only the latest 100 records for each location
+        // Keep only the latest 125 records for each location
         const deleteQuery = `
             DELETE FROM district
             WHERE id NOT IN (
@@ -134,7 +134,7 @@ async function postLocationData(location) {
         `;
         await request.query(deleteQuery);
 
-        console.log(`Data for ${location} inserted successfully and older records deleted`);
+        //console.log(`Data for ${location} inserted successfully and older records deleted`);
     } catch (error) {
         console.error(`Error inserting data for ${location}:`, error);
     }
@@ -167,6 +167,6 @@ setInterval(async () => {
     for (const location of locations) {
         await postLocationData(location);
     }
-}, 5000);
+}, 5 * 60 * 1000);
 
 module.exports = router;
