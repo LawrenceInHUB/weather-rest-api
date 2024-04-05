@@ -22,7 +22,7 @@ const swaggerDefinition = {
   },
   servers: [
     {
-      url: 'https://weather-rest-api-ed7w.onrender.com',
+      url: 'https://weather-rest-api-ed7w.onrender.com/api',
       description: 'Development server',
     },
   ],
@@ -167,7 +167,33 @@ router.get('/districts/:districtName', authenticateToken, async (req, res) => {
 });
 
 // Update Selected District Weather Data
-// Not in use , But set support on backend
+/**
+ * @swagger
+ * /districts/{id}:
+ *   put:
+ *     summary: Update Selected District Weather Data
+ *     description: Update weather data for a specific district
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the district
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/DistrictData'
+ *     responses:
+ *       '200':
+ *         description: Data updated successfully
+ *       '500':
+ *         description: Internal Server Error
+ */
 router.put('/districts/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
@@ -183,7 +209,27 @@ router.put('/districts/:id', authenticateToken, async (req, res) => {
 });
 
 // Delete Selected District Weather Data
-// Not in use , But set support on backend
+/**
+ * @swagger
+ * /districts/{id}:
+ *   delete:
+ *     summary: Delete Selected District Weather Data
+ *     description: Delete weather data for a specific district
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the district
+ *     responses:
+ *       '200':
+ *         description: Data deleted successfully
+ *       '500':
+ *         description: Internal Server Error
+ */
 router.delete('/districts/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
