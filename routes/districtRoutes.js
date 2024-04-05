@@ -7,12 +7,90 @@ const locations = require('../Utils/locations');
 const authenticateToken = require('../middleware/authentication');
 const { insertDistrictData, getAllDistricts, getLatestDistrictData } = require('../Utils/databaseOperations');
 
+// Import swaggerJsdoc
+const swaggerJsdoc = require('swagger-jsdoc');
+// Import swaggerUi module
+const swaggerUi = require('swagger-ui-express');
+
+// Swagger definition
+const swaggerDefinition = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Weather API',
+    version: '1.0.0',
+    description: 'API for managing weather data of districts',
+  },
+  servers: [
+    {
+      url: 'https://weather-rest-api-ed7w.onrender.com',
+      description: 'Development server',
+    },
+  ],
+  components: {
+    schemas: {
+      DistrictData: {
+        type: 'object',
+        properties: {
+          location: { type: 'string' },
+          condition: { type: 'string' },
+          temperature: { type: 'number', format: 'float' },
+          rainfall: { type: 'number', format: 'float' },
+          humidity: { type: 'integer' },
+          reported_time: { type: 'string', format: 'date-time' },
+          air_pressure: { type: 'number', format: 'float' }
+        }
+      }
+    },
+    securitySchemes: {
+      bearerAuth: {
+        type: 'apiKey',
+        name: 'Authorization',
+        scheme: 'bearer',
+        in: 'header',
+      },
+    },
+  },
+};
+
+// Options for the swagger-jsdoc
+const options = {
+  swaggerDefinition,
+  // Path to the API docs
+  apis: ['./routes/*.js'], // Change this to the path where your routes are defined
+};
+
+// Initialize swagger-jsdoc
+const swaggerSpec = swaggerJsdoc(options);
+
+// Serve Swagger UI
+router.use('/api-docs', swaggerUi.serve);
+router.get('/api-docs', swaggerUi.setup(swaggerSpec));
+
+// Cerate new District Weather Data
+/**
+ * @swagger
+ * /districts:
+ *   post:
+ *     summary: Create new District Weather Data
+ *     description: Create new weather data for a district
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/DistrictData'
+ *     responses:
+ *       '201':
+ *         description: Data inserted successfully
+ *       '500':
+ *         description: Internal Server Error
+ */
 router.post('/districts', authenticateToken, async (req, res) => {
     try {
         const { location, condition, temperature, rainfall, humidity, reported_time, air_pressure } = req.body;
-
         await insertDistrictData(location, condition, temperature, rainfall, humidity, reported_time, air_pressure);
-
         res.status(201).send('Data inserted successfully');
     } catch (error) {
         console.error('Error:', error);
@@ -20,6 +98,27 @@ router.post('/districts', authenticateToken, async (req, res) => {
     }
 });
 
+// Get all Districts Weather Data
+/**
+ * @swagger
+ * /districts:
+ *   get:
+ *     summary: Get all Districts Weather Data
+ *     description: Retrieve all weather data for districts
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/DistrictData'
+ *       '500':
+ *         description: Internal Server Error
+ */
 router.get('/districts', authenticateToken, async (req, res) => {
     try {
         const districts = await getAllDistricts();
@@ -30,6 +129,32 @@ router.get('/districts', authenticateToken, async (req, res) => {
     }
 });
 
+// Get Selected District Weather Data
+/**
+ * @swagger
+ * /districts/{districtName}:
+ *   get:
+ *     summary: Get Selected District Weather Data
+ *     description: Retrieve weather data for a specific district
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: districtName
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Name of the district
+ *     responses:
+ *       '200':
+ *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DistrictData'
+ *       '500':
+ *         description: Internal Server Error
+ */
 router.get('/districts/:districtName', authenticateToken, async (req, res) => {
     try {
         const districtName = req.params.districtName;
@@ -41,6 +166,8 @@ router.get('/districts/:districtName', authenticateToken, async (req, res) => {
     }
 });
 
+// Update Selected District Weather Data
+// Not in use , But set support on backend
 router.put('/districts/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
@@ -55,6 +182,8 @@ router.put('/districts/:id', authenticateToken, async (req, res) => {
     }
 });
 
+// Delete Selected District Weather Data
+// Not in use , But set support on backend
 router.delete('/districts/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
@@ -69,6 +198,7 @@ router.delete('/districts/:id', authenticateToken, async (req, res) => {
 });
 
 
+// Generate random data for each location and insert it into the database every 5 minutes
 setInterval(async () => {
     for (const location of locations) {
         try {
