@@ -5,7 +5,17 @@ const districtSchema = require('../models/District');
 const generateRandomData = require('../Utils/dataGenerator'); 
 const locations = require('../Utils/locations');
 const authenticateToken = require('../middleware/authentication'); 
-const config = require('../Utils/sqlConnection')
+
+const config = {
+    user: 'user',
+    password: 'Nibm@123',
+    server: 'nibm.database.windows.net',
+    database: 'weather',
+    options: {
+        encrypt: true, 
+        trustServerCertificate: false 
+    }
+};
 
 connectToDatabase();
 

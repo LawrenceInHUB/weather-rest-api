@@ -20,4 +20,4 @@ async function connectToDatabase() {
   }
 }
 
-module.exports = { sql, connectToDatabase, config };
+module.exports = { sql, connectToDatabase };
