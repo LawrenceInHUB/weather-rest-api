@@ -4,16 +4,8 @@ const { sql, connectToDatabase } = require('../Utils/sqlConnection');
 const districtSchema = require('../models/District');
 const generateRandomData = require('../Utils/dataGenerator'); 
 const locations = require('../Utils/locations');
-const config = {
-    user: 'user',
-    password: 'Nibm@123',
-    server: 'nibm.database.windows.net',
-    database: 'weather',
-    options: {
-      encrypt: true, 
-      trustServerCertificate: false 
-    }
-};
+const authenticateToken = require('../middleware/authentication'); 
+const config = require('../Utils/sqlConnection')
 
 connectToDatabase();
 
@@ -21,13 +13,13 @@ const pool = new sql.ConnectionPool(config);
 const poolConnect = pool.connect();
 
 router.use(async (req, res, next) => {
-  try {
-    await poolConnect;
-    next();
-  } catch (error) {
-    console.error('Error establishing database connection:', error);
-    res.status(500).send('Internal Server Error');
-  }
+    try {
+        await poolConnect;
+        next();
+    } catch (error) {
+        console.error('Error establishing database connection:', error);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
 // Define the SQL query to create the 'district' table
@@ -68,11 +60,11 @@ async function createDistrictTableIfNotExists() {
 createDistrictTableIfNotExists();
 
 // Define the route to handle POST requests
-router.post('/districts', async (req, res) => {
+router.post('/districts', authenticateToken, async (req, res) => {
     try {
         const { location, condition, temperature, rainfall, humidity, reported_time, air_pressure } = req.body;
         const request = pool.request();
-                await request
+        await request
             .input('location', sql.NVarChar, location)
             .input('condition', sql.NVarChar, condition)
             .input('temperature', sql.Float, temperature)
@@ -90,11 +82,10 @@ router.post('/districts', async (req, res) => {
     }
 });
 
-
-router.get('/districts', async (req, res) => {
+// Define the route to fetch all districts
+router.get('/districts', authenticateToken, async (req, res) => {
     try {
         const request = pool.request();
-        
         const result = await request.query('SELECT * FROM district');
         res.status(200).json(result.recordset);
     } catch (error) {
@@ -103,7 +94,7 @@ router.get('/districts', async (req, res) => {
     }
 });
 
-// Define the function to automatically post data for each location every 5 minutes
+// Define the function to automatically post data for each location every 5 seconds
 async function postLocationData(location) {
     try {
         const request = pool.request();
@@ -121,8 +112,7 @@ async function postLocationData(location) {
         .query(`INSERT INTO district (location, condition, temperature, rainfall, humidity, reported_time, air_pressure) 
                 VALUES (@location, @condition, @temperature, @rainfall, @humidity, @reported_time, @air_pressure)`);
 
-
-        // Keep only the latest 125 records for each location
+        // Keep only the latest 100 records for each location
         const deleteQuery = `
             DELETE FROM district
             WHERE id NOT IN (
@@ -140,7 +130,8 @@ async function postLocationData(location) {
     }
 }
 
-router.get('/districts/:districtName', async (req, res) => {
+// Route to fetch the latest data for a specific district
+router.get('/districts/:districtName', authenticateToken, async (req, res) => {
     try {
         const districtName = req.params.districtName;
         const request = pool.request();
@@ -161,14 +152,11 @@ router.get('/districts/:districtName', async (req, res) => {
     }
 });
 
-
-
-
-// Automatically post data for each location every 5 minutes
+// Automatically post data for each location every 5 seconds
 setInterval(async () => {
     for (const location of locations) {
         await postLocationData(location);
     }
-}, 5 * 60 * 1000);
+}, 5000);
 
 module.exports = router;
