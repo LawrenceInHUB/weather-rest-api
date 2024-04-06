@@ -21,6 +21,8 @@ async function insertDistrictData(location, condition, temperature, rainfall, hu
     }
 }
 
+
+
 // Function to fetch all districts from the database
 async function getAllDistricts() {
     try {

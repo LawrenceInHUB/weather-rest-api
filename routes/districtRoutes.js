@@ -243,20 +243,46 @@ router.delete('/districts/:id', authenticateToken, async (req, res) => {
     }
 });
 
+async function postLocationData(location) {
+  try {
+      const request = pool.request();
+      const data = await generateRandomData(location);
+
+      // Insert data into the database
+      await request
+      .input('location', sql.NVarChar, data.location)
+      .input('condition', sql.NVarChar, data.condition)
+      .input('temperature', sql.Float, data.temperature)
+      .input('rainfall', sql.Float, data.rainfall)
+      .input('humidity', sql.Float, data.humidity)
+      .input('reported_time', sql.DateTime, data.reported_time)
+      .input('air_pressure', sql.Float, data.air_pressure)
+      .query(`INSERT INTO district (location, condition, temperature, rainfall, humidity, reported_time, air_pressure) 
+              VALUES (@location, @condition, @temperature, @rainfall, @humidity, @reported_time, @air_pressure)`);
+
+      // Keep only the latest 100 records for each location
+      const deleteQuery = `
+          DELETE FROM district
+          WHERE id NOT IN (
+              SELECT TOP 5 id
+              FROM district
+              WHERE location = @location
+              ORDER BY reported_time DESC
+          ) AND location = @location;
+      `;
+      await request.query(deleteQuery);
+
+      console.log(`Data for ${location} inserted successfully and older records deleted`);
+  } catch (error) {
+      console.error(`Error inserting data for ${location}:`, error);
+  }
+}
 
 // Generate random data for each location and insert it into the database every 5 minutes
 setInterval(async () => {
-    for (const location of locations) {
-        try {
-            const data = await generateRandomData(location);
-            
-            await insertDistrictData(data.location, data.condition, data.temperature, data.rainfall, data.humidity, data.reported_time, data.air_pressure);
-            
-            console.log(`Data for ${location} inserted successfully`);
-        } catch (error) {
-            console.error(`Error inserting data for ${location}:`, error);
-        }
-    }
+  for (const location of locations) {
+      await postLocationData(location);
+  }
 }, 5 * 60 * 1000);
 
 module.exports = router;
