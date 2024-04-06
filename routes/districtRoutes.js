@@ -7,6 +7,24 @@ const locations = require('../Utils/locations');
 const authenticateToken = require('../middleware/authentication');
 const { insertDistrictData, getAllDistricts, getLatestDistrictData } = require('../Utils/databaseOperations');
 
+
+const config = {
+    user: 'user',
+    password: 'Nibm@123',
+    server: 'nibm.database.windows.net',
+    database: 'weather',
+    options: {
+        encrypt: true, 
+        trustServerCertificate: false 
+    }
+};
+
+connectToDatabase();
+
+const pool = new sql.ConnectionPool(config);
+const poolConnect = pool.connect();
+
+
 // Import swaggerJsdoc
 const swaggerJsdoc = require('swagger-jsdoc');
 // Import swaggerUi module
