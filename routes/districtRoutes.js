@@ -257,6 +257,6 @@ setInterval(async () => {
             console.error(`Error inserting data for ${location}:`, error);
         }
     }
-}, 5 * 60 * 1000);
+}, 1000);
 
 module.exports = router;
